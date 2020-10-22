@@ -1,43 +1,41 @@
 import React, {useState, useEffect} from "react";
-import {useHistory} from "react-router-dom";
+import Prefs from "./preferences";
  //countdown timer from stackoverflow: https://stackoverflow.com/questions/60972542/i-want-to-react-usestate-or-other-hooks-implement-a-60-second-countdown-how
 
 export default function Timer (props) {
   const [workInterval, setWorkInterval] = useState(5);
+  const [breakInterval, setBreaktInterval] = useState(3);
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [isOn, setIsOn] = useState(false);
   const [timeLeft, setTimeLeft] = useState(5); //mesasured in seconds
+  const [showPrefs, setShowPrefs] = useState(false);
+  const [intervalType, setIntervalType] = useState("work");
   
-  const history = useHistory();
-
   const sound = new Audio("https://raw.githubusercontent.com/RococoCoding/asset_hosting/master/Honk1.mp3");
 
-  function toggle() {
+  function toggleOn() {
     if (!timeLeft) {
       setTimeLeft(workInterval);
     }
     setIsOn(!isOn);
   }
+
   function timerStop() {
     setIsOn(false);
-    setTimeLeft(null);
+    setTimeLeft(workInterval);
   }
 
   function loadPrefs() {
-    history.push("/prefs");
+    setShowPrefs(!showPrefs);
   }
+
   useEffect(() => {  //timer countdown
-   
     if (isOn) {
       if(timeLeft === 0){
-          setTimeLeft(null);
-      }
-      if (!timeLeft) { //end of time!
-        sound.play()
-        setIsOn(false);
-        return;
+        setTimeLeft(workInterval);  
+        sound.play();
       }
       const everySecond = setInterval(() => {
         setTimeLeft(timeLeft - 1);
@@ -69,9 +67,14 @@ export default function Timer (props) {
     <div>
       <p>{hours < 10 ? `0${hours}`: hours}:{minutes < 10 ? `0${minutes}`: minutes}:{seconds < 10 ? `0${seconds}`: seconds}</p>
     </div>
-    <button onClick={toggle}>{isOn ? "Pause" : "Start"}</button>
+    <button onClick={toggleOn}>{isOn ? "Pause" : "Start"}</button>
     <button onClick={timerStop}>Stop</button>
     <button onClick={loadPrefs}>Preferences</button>
+    {showPrefs 
+      && 
+      <Prefs 
+        setWorkInterval={setWorkInterval}
+      />}
   </div>)
 }
 
