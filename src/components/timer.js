@@ -12,7 +12,8 @@ export default function Timer (props) {
   const [intervalType, setIntervalType] = useState("Work");
 
   const workInterval = 5;
-  const breakInterval = 4;
+  const shortBreakInterval = 4;
+  const longBreakInterval = 6;
   const snoozeInterval = 3;
   const showPrefs = false;
   const snoozeCounter = 0;
@@ -38,35 +39,44 @@ export default function Timer (props) {
 
   }
   useEffect(()=> {
-    if (intervalType === "Work") {
-      setTimeLeft(workInterval);
+    switch(intervalType) {
+      case "Work":
+        setTimeLeft(workInterval);
+        break;
+      case "Short Break":
+        setTimeLeft(shortBreakInterval);
+        break;
+      case "Long Break":
+        setTimeLeft(longBreakInterval);
+        break;
+      case "Snooze":
+        setTimeLeft(snoozeInterval);
+        break;
     }
-    else if (intervalType === "Break") {
-      setTimeLeft(breakInterval);
-    }
-    else setTimeLeft(snoozeInterval);
   }, [intervalType]);
 
   useEffect(() => {  //timer countdown
     if (timerOn) {
       if(timeLeft === 0){ //interval type switch -- work, break or snooze
-        if (intervalType === "Work" && snoozeOn) {
-          setIntervalType("Snooze");
-          sound.play();
-        }
-        else if (intervalType === "Work") {
-          setIntervalType("Break");  
-          sound.play();
-        }
-        else if (intervalType === "Break") {
-          setIntervalType("Work");
-          sound.play();
-        }
-        else {
-          setIntervalType("Break");
-          sound.play();
-        }
-        
+        switch(intervalType) {
+          case "Work": 
+            if(snoozeOn) {
+              setIntervalType("Snooze");
+              sound.play();
+            }
+            else {
+              setIntervalType("Short Break");  
+              sound.play();
+            }
+            break;
+          case "Short Break":
+            setIntervalType("Work");
+            sound.play();
+            break; 
+          case "Snooze":
+            setIntervalType("Short Break");
+            sound.play();
+        } 
       }
       const everySecond = setInterval(() => {
         setTimeLeft(timeLeft - 1);
