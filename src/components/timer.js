@@ -1,51 +1,60 @@
 import React, {useState, useEffect} from "react";
-//timer function
-//display interval length at start
-//count down every second
-//stop at 0
+import {useHistory} from "react-router-dom";
+ //countdown timer from stackoverflow: https://stackoverflow.com/questions/60972542/i-want-to-react-usestate-or-other-hooks-implement-a-60-second-countdown-how
 
 export default function Timer (props) {
-  const [workInterval, setWorkInterval] = useState(null);
+  const [workInterval, setWorkInterval] = useState(5);
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [isOn, setIsOn] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(1200);
+  const [timeLeft, setTimeLeft] = useState(5); //mesasured in seconds
+  
+  const history = useHistory();
 
+  const sound = new Audio("https://raw.githubusercontent.com/RococoCoding/asset_hosting/master/Honk1.mp3");
 
   function toggle() {
+    if (!timeLeft) {
+      setTimeLeft(workInterval);
+    }
     setIsOn(!isOn);
   }
+  function timerStop() {
+    setIsOn(false);
+    setTimeLeft(null);
+  }
 
-  useEffect(() => {
+  function loadPrefs() {
+    history.push("/prefs");
+  }
+  useEffect(() => {  //timer countdown
+   
     if (isOn) {
-      if(timeLeft===0){
-          setTimeLeft(null)
+      if(timeLeft === 0){
+          setTimeLeft(null);
       }
-      // exit early when we reach 0
-      if (!timeLeft) return;
-      // save everySecond to clear the interval when the
-      // component re-renders
+      if (!timeLeft) { //end of time!
+        sound.play()
+        setIsOn(false);
+        return;
+      }
       const everySecond = setInterval(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
-      // clear interval on re-render to avoid memory leaks
       return () => clearInterval(everySecond);
-      // add timeLeft as a dependency to re-rerun the effect
-      // when we update it
     }
   }, [isOn, timeLeft]);
 
-  useEffect(()=>{ //calculates secondsleft to display
-    //divides seconds left to get hours then minutes then seconds left for display
+  useEffect(()=>{ //converts timeLeft to hr/min/sec for display
     let minutesLeft = -1
-    if (timeLeft / (60*60) >= 1) { //if an hour or more left
+    if (timeLeft / (60*60) >= 1) {
       setHours(Math.floor(timeLeft / (60*60))); 
       minutesLeft = timeLeft/60;
     }
     if (timeLeft / 60 >= 1 || minutesLeft/60 > 1) { //if at least 1 minute left or went into previous hour block
-      if (minutesLeft === -1) { //if did not already divide remaining time by hour
-        minutesLeft = timeLeft/60; //divide by minutes
+      if (minutesLeft === -1) {
+        minutesLeft = timeLeft/60;
       }
       setMinutes(Math.floor(minutesLeft));
       if (timeLeft % 60 >= 60) {
@@ -58,11 +67,11 @@ export default function Timer (props) {
   return (
   <div>
     <div>
-      <p>{hours}:{minutes}:{seconds < 10 ? `0${seconds}`: seconds}</p>
+      <p>{hours < 10 ? `0${hours}`: hours}:{minutes < 10 ? `0${minutes}`: minutes}:{seconds < 10 ? `0${seconds}`: seconds}</p>
     </div>
-    <button onClick={toggle}>{isOn ? "Stop" : "Start"}</button>
-    {/* <button onClick={timerPause}>Pause</button>
-    <button onClick={timerEnd}>Stop</button> */}
+    <button onClick={toggle}>{isOn ? "Pause" : "Start"}</button>
+    <button onClick={timerStop}>Stop</button>
+    <button onClick={loadPrefs}>Preferences</button>
   </div>)
 }
 
