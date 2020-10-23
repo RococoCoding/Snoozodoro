@@ -3,6 +3,7 @@ import Prefs from "./preferences";
  //countdown timer from stackoverflow: https://stackoverflow.com/questions/60972542/i-want-to-react-usestate-or-other-hooks-implement-a-60-second-countdown-how
 
 export default function Timer (props) {
+  // #region States and variables
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
@@ -12,18 +13,19 @@ export default function Timer (props) {
   const [intervalType, setIntervalType] = useState("Work");
   const [snoozeCounter, setSnoozeCounter] = useState(0);
   const [breakCounter, setBreakCounter] = useState(0);
-
+  const [showPrefs, setShowPrefs] = useState(false);
+  const [sound, setSound] = useState(new Audio("/assets/sounds/mariocoins.wav"));
 
   let snoozeEnable = true;
-  let workInterval = 5;
+  let workInterval = 1;
   let shortBreakInterval = 4;
   let longBreakInterval = 6;
   let snoozeInterval = 3;
-  let showPrefs = false;
   let breakTimes = 1;
   let snoozeTimes = 1;
-  const sound = new Audio("https://raw.githubusercontent.com/RococoCoding/asset_hosting/master/Honk1.mp3");
+//#endregion
 
+//#region functions for timer component
   function toggleOn() {
     if (!timeLeft) {
       setTimeLeft(workInterval);
@@ -37,13 +39,17 @@ export default function Timer (props) {
   }
 
   function loadPrefs() {
-    showPrefs = !showPrefs;
+    setShowPrefs(!showPrefs);
   }
 
   function submitPrefs(){//preferences form submit
 
   }
+//#endregion
 
+//  #region useEffects - timer countdown & display
+
+  //change interval type auto chagnes time left
   useEffect(()=> {
     switch(intervalType) {
       case "Work":
@@ -63,6 +69,7 @@ export default function Timer (props) {
         break;
     }
   }, [intervalType]);
+
 
   useEffect(() => {  //timer countdown
     if (timerOn) {
@@ -121,6 +128,8 @@ export default function Timer (props) {
     }
   }, [timerOn, timeLeft]);
 
+
+
   useEffect(()=>{ //converts timeLeft to hr/min/sec for display
     let minutesLeft = -1
     if (timeLeft / (60*60) >= 1) {
@@ -138,7 +147,17 @@ export default function Timer (props) {
     }
     else setSeconds(Math.floor(timeLeft));
   }, [timeLeft])
+  //#endregion
 
+
+  // #region functions for preferences component
+  function previewSound(e) {
+    let previewSound = new Audio(`/assets/sounds/${e.target.value}`);
+    previewSound.play()
+    setSound(new Audio(`/assets/sounds/${e.target.value}`));
+  };
+
+  //#endregion
   return (
   <div>
     <div>
@@ -152,6 +171,7 @@ export default function Timer (props) {
       && 
       <Prefs
         submit={submitPrefs}
+        previewSound={previewSound}
       />}
   </div>)
 }
