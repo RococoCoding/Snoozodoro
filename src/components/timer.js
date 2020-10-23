@@ -8,15 +8,20 @@ export default function Timer (props) {
   const [seconds, setSeconds] = useState(0);
   const [timerOn, setTimerOn] = useState(false);
   const [timeLeft, setTimeLeft] = useState(5); //mesasured in seconds 
-  const [snoozeOn, setSnoozeOn] = useState(false);
+  const [snoozeOn, setSnoozeOn] = useState(true);
   const [intervalType, setIntervalType] = useState("Work");
+  const [snoozeCounter, setSnoozeCounter] = useState(0);
+  const [breakCounter, setBreakCounter] = useState(0);
 
-  const workInterval = 5;
-  const shortBreakInterval = 4;
-  const longBreakInterval = 6;
-  const snoozeInterval = 3;
-  const showPrefs = false;
-  const snoozeCounter = 0;
+
+  let snoozeEnable = true;
+  let workInterval = 5;
+  let shortBreakInterval = 4;
+  let longBreakInterval = 6;
+  let snoozeInterval = 3;
+  let showPrefs = false;
+  let breakTimes = 1;
+  let snoozeTimes = 1;
   const sound = new Audio("https://raw.githubusercontent.com/RococoCoding/asset_hosting/master/Honk1.mp3");
 
   function toggleOn() {
@@ -38,6 +43,7 @@ export default function Timer (props) {
   function submitPrefs(){//preferences form submit
 
   }
+
   useEffect(()=> {
     switch(intervalType) {
       case "Work":
@@ -45,9 +51,12 @@ export default function Timer (props) {
         break;
       case "Short Break":
         setTimeLeft(shortBreakInterval);
+        setSnoozeCounter(0);
         break;
       case "Long Break":
         setTimeLeft(longBreakInterval);
+        setSnoozeCounter(0);
+        setBreakCounter(0);
         break;
       case "Snooze":
         setTimeLeft(snoozeInterval);
@@ -57,26 +66,53 @@ export default function Timer (props) {
 
   useEffect(() => {  //timer countdown
     if (timerOn) {
+      // let type = intervalType;
+      // setIntervalType("null");
       if(timeLeft === 0){ //interval type switch -- work, break or snooze
         switch(intervalType) {
           case "Work": 
             if(snoozeOn) {
               setIntervalType("Snooze");
-              sound.play();
+              setSnoozeCounter(snoozeCounter+1);
+              if (snoozeCounter > snoozeTimes) {
+                setSnoozeCounter(0);
+                setSnoozeOn(false);
+              }
             }
             else {
-              setIntervalType("Short Break");  
-              sound.play();
+              if (breakCounter < breakTimes) {
+                setIntervalType("Short Break");
+              }
+              else {
+                setIntervalType("Long Break");
+              }
             }
             break;
           case "Short Break":
+            setBreakCounter(breakCounter+1);
             setIntervalType("Work");
-            sound.play();
+            snoozeEnable && setSnoozeOn(true);
             break; 
           case "Snooze":
-            setIntervalType("Short Break");
-            sound.play();
+            if (snoozeCounter < snoozeTimes) {
+              // react won't update intervaltype bc value is same; skip straight to set time
+              setTimeLeft(snoozeInterval); 
+              setSnoozeCounter(snoozeCounter+1);
+            }
+            else {
+              if (breakCounter < breakTimes) {
+                setIntervalType("Short Break");
+              }
+              else {
+                setIntervalType("Long Break");
+              }
+            }
+            break;
+          case "Long Break":
+          setIntervalType("Work");
+          snoozeEnable && setSnoozeOn(true);
         } 
+        sound.play();
       }
       const everySecond = setInterval(() => {
         setTimeLeft(timeLeft - 1);
