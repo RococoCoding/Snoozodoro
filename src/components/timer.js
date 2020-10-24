@@ -10,6 +10,9 @@ export default function Timer (props) {
   const [timerOn, setTimerOn] = useState(false);
   const [timeLeft, setTimeLeft] = useState(5); //mesasured in seconds 
   const [snoozeOn, setSnoozeOn] = useState(true);
+  const [workInterval, setWorkInterval] = useState(1);
+  const [shortBreakInterval, setShortBreakInterval] = useState(3);
+  const [longBreakInterval, setLongBreakInterval] = useState(4);
   const [intervalType, setIntervalType] = useState("Work");
   const [snoozeCounter, setSnoozeCounter] = useState(0);
   const [breakCounter, setBreakCounter] = useState(0);
@@ -17,9 +20,6 @@ export default function Timer (props) {
   const [sound, setSound] = useState(new Audio("/assets/sounds/mariocoins.wav"));
 
   let snoozeEnable = true;
-  let workInterval = 1;
-  let shortBreakInterval = 4;
-  let longBreakInterval = 6;
   let snoozeInterval = 3;
   let breakTimes = 1;
   let snoozeTimes = 1;
@@ -42,8 +42,9 @@ export default function Timer (props) {
     setShowPrefs(!showPrefs);
   }
 
-  function submitPrefs(){//preferences form submit
-
+  function submitPrefs(e){//preferences form submit
+    e.preventDefault()
+    // setTimeLeft(workInterval);
   }
 //#endregion
 
@@ -67,14 +68,15 @@ export default function Timer (props) {
       case "Snooze":
         setTimeLeft(snoozeInterval);
         break;
+      case "Pause for alarm":
+        setTimeLeft(10);
+        break;
     }
   }, [intervalType]);
 
 
   useEffect(() => {  //timer countdown
     if (timerOn) {
-      // let type = intervalType;
-      // setIntervalType("null");
       if(timeLeft === 0){ //interval type switch -- work, break or snooze
         switch(intervalType) {
           case "Work": 
@@ -119,6 +121,7 @@ export default function Timer (props) {
           setIntervalType("Work");
           snoozeEnable && setSnoozeOn(true);
         } 
+        clearInterval(everySecond)
         sound.play();
       }
       const everySecond = setInterval(() => {
@@ -153,7 +156,7 @@ export default function Timer (props) {
   // #region functions for preferences component
   function previewSound(e) {
     let previewSound = new Audio(`/assets/sounds/${e.target.value}`);
-    previewSound.play()
+    previewSound.play();
     setSound(new Audio(`/assets/sounds/${e.target.value}`));
   };
 
@@ -171,6 +174,10 @@ export default function Timer (props) {
       && 
       <Prefs
         submit={submitPrefs}
+        setTimeLeft={setTimeLeft}
+        setWorkInterval={setWorkInterval}
+        setShortBreakInterval={setShortBreakInterval}
+        setLongBreakInterval={setLongBreakInterval}
         previewSound={previewSound}
       />}
   </div>)
