@@ -5,33 +5,43 @@ import moment from "moment";
 
 
 export default function Prefs(props) {
+  const {resetTimer, submit, setIntervals, intervals, setTimeLeft, setSnoozeEnabled, snoozeEnabled} = props
   function timeToSeconds(e) {
     return e._d.getSeconds() + (e._d.getHours() * 60 * 60) + (e._d.getMinutes() * 60);
   }
+
   function selectWorkTime(e) {
-    props.setWorkInterval(timeToSeconds(e));
-    props.setTimeLeft(timeToSeconds(e));
+    setIntervals({...intervals, "work": timeToSeconds(e)});
+    setTimeLeft(timeToSeconds(e));
+    resetTimer();
   }
 
-  function selectLongBreakTime() {
-    props.setLongBreakInterval(timeToSeconds(e));
+  function selectLongBreakTime(e) {
+    setIntervals({...intervals, "longBreak": timeToSeconds(e)});
+    resetTimer();
   }
 
-  function selectShortBreakTime() {
-    props.setShortBreakInterval(timeToSeconds(e));
+  function selectShortBreakTime(e) {
+    setIntervals({...intervals, "shortBreak": timeToSeconds(e)});
+    resetTimer();
+  }
+
+  function snoozeToggle() {
+    setSnoozeEnabled(!snoozeEnabled);
+    resetTimer();
   }
 
   return (
     <div>
       <h2>Preferences</h2>
-      <form onSubmit={props.submit}>
+      <form onSubmit={submit}>
         <label htmlFor="work-interval">Set Work Interval</label>
         <TimePicker onSelect={selectWorkTime} name="work-interval" defaultValue={moment('00:00:00', 'HH:mm:ss')} />
         
-        <label htmlFor="short-break-interval">Set Break Interval</label>
+        <label htmlFor="short-break-interval">Set Short Break Interval</label>
         <TimePicker onSelect={selectShortBreakTime} name="short-break-interval" defaultValue={moment('00:00:00', 'HH:mm:ss')} />
 
-        <label htmlFor="long-break-interval">Set Break Interval</label>
+        <label htmlFor="long-break-interval">Set Long Break Interval</label>
         <TimePicker onSelect={selectLongBreakTime} name="long-break-interval" defaultValue={moment('00:00:00', 'HH:mm:ss')} />
 
         <label htmlFor="audio">Pick an alarm sound</label>
@@ -48,6 +58,8 @@ export default function Prefs(props) {
           <option value="psychosis.wav">Psychosis</option>
           <option value="ufo.wav>">UFO</option>
         </select>
+
+        <button onClick={snoozeToggle}>Turn snooze {props.snoozeEnabled ? "Off":"On"}</button>
       </form>
     </div>
   )

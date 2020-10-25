@@ -19,8 +19,7 @@ Set alarm tones.
 
 
 //TO-DO
-fix choose intervals
+snooze enable/disable pref
 set up interval count prefs
-snooze plays alarm longer at end of cycle
-giant turn off snooze button with overlay, auto starts break
 when break is over, stop timer
+reset button
